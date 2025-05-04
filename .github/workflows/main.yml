@@ -15,7 +15,19 @@ jobs:
  
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
- 
+
+      - name: Create EB application version
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION:            eu-central-1
+          APP_NAME:              frontend
+          VERSION_LABEL:         v-${{ github.run_number }}
+        run:
+          aws elasticbeanstalk create-application-version \
+            --application-name $APP_NAME \
+            --version-label $VERSION_LABEL \
+            --source-bundle S3Bucket="elasticbeanstalk-eu-central-1-621222165099",S3Key="app-${{ github.sha }}.zip"
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
         with:
