@@ -22,7 +22,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_REGION:            eu-central-1
           S3_BUCKET:             elasticbeanstalk-eu-central-1-621222165099
-          VERSION:               v-${{ github.run_number }}
+          VERSION:               v-${{ github.run_number }}-${{ github.sha }}
         run: |
           aws s3 cp deploy.zip s3://$S3_BUCKET/app-$VERSION.zip
       
@@ -49,5 +49,6 @@ jobs:
           environment_name: Frontend-env
           existing_bucket_name: elasticbeanstalk-eu-central-1-621222165099
           region: eu-central-1
-          version_label: v-${{ github.run_number }}  
-          deployment_package: deploy.zip
+          version_label: v-${{ github.run_number }}-${{ github.sha }}
+          deployment_package: deploy.
+          use_existing_version_if_available: true
