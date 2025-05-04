@@ -19,14 +19,14 @@ jobs:
       - name: Create EB application version
         env:
           AWS_REGION: eu-central-1
-          EB_APP: frontend                            # ← Your Elastic Beanstalk application name
-          EB_ENV: Frontend-env                         # ← Your EB environment name
+          EB_APP: frontend 
+          EB_ENV: Frontend-env
           S3_BUCKET: elasticbeanstalk-eu-central-1-621222165099
           VERSION: v-${{ github.run_number }}  
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name $EB_APP           # ← expands to "frontend"
-            --version-label $VERSION             # ← expands to e.g. "v-123"
+            --application-name $EB_APP \
+            --version-label $VERSION \
             --source-bundle S3Bucket=$S3_BUCKET,S3Key="app-$VERSION.zip"
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
