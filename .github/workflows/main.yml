@@ -16,6 +16,16 @@ jobs:
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
 
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:            eu-central-1
+          S3_BUCKET:             elasticbeanstalk-eu-central-1-621222165099
+          VERSION:               v-${{ github.run_number }}
+        run: |
+          aws s3 cp deploy.zip s3://$S3_BUCKET/app-$VERSION.zip
+      
       - name: Create EB application version
         env:
           AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY }}
