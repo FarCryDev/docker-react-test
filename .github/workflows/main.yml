@@ -1,54 +1,42 @@
 name: Deploy Frontend
+
 on:
   push:
     branches:
-      - main # check your repo, your default branch might be master!
- 
+      - main
+
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
-      - run: docker run -e CI=true cygnetops/react-test npm test
- 
-      - name: Generate deployment package
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region:            eu-central-1
+
+      - name: Build & test container
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t cygnetops/react-test -f Dockerfile.dev .
+          docker run -e CI=true cygnetops/react-test npm test
+
+      - name: Package application
         run: zip -r deploy.zip . -x '*.git*'
 
-      - name: Upload to S3
-        env:
-          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-          AWS_REGION:            eu-central-1
-          S3_BUCKET:             elasticbeanstalk-eu-central-1-621222165099
-          VERSION:               v-${{ github.run_number }}
-        run: |
-          aws s3 cp deploy.zip s3://$S3_BUCKET/app-$VERSION.zip
-      
-      - name: Create EB application version
-        env:
-          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-          AWS_REGION: eu-central-1
-          EB_APP: frontend 
-          EB_ENV: Frontend-env
-          S3_BUCKET: elasticbeanstalk-eu-central-1-621222165099
-          VERSION: v-${{ github.run_number }}
-        run: |
-          aws elasticbeanstalk create-application-version \
-            --application-name $EB_APP \
-            --version-label $VERSION \
-            --source-bundle S3Bucket=$S3_BUCKET,S3Key="app-$VERSION.zip"
-      - name: Deploy to EB
+      - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-          application_name: frontend
-          environment_name: Frontend-env
-          existing_bucket_name: elasticbeanstalk-eu-central-1-621222165099
-          region: eu-central-1
-          version_label: v-${{ github.run_number }}
-          deployment_package: deploy.
+          aws_access_key_id:      ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_access_key:  ${{ secrets.AWS_SECRET_KEY }}
+          region:                 eu-central-1
+          application_name:       frontend
+          environment_name:       Frontend-env
+          version_label:          v-${{ github.run_number }}
+          deployment_package:     deploy.zip
           use_existing_version_if_available: true
