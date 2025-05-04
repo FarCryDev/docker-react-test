@@ -27,7 +27,7 @@ jobs:
           docker run -e CI=true cygnetops/react-test npm test
 
       - name: Package application
-        run: zip -r deploy.zip . -x '*.git*'
+        run: zip -r deploy.zip Dockerfile .platform . -x '*.git*'
 
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
