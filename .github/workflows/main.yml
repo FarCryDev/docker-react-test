@@ -18,6 +18,8 @@ jobs:
 
       - name: Create EB application version
         env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_REGION: eu-central-1
           EB_APP: frontend 
           EB_ENV: Frontend-env
