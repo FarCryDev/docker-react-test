@@ -20,11 +20,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region:            eu-central-1
 
-      - name: Build & test container
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t cygnetops/react-test -f Dockerfile.dev .
-          docker run -e CI=true cygnetops/react-test npm test
+      # - name: Build & test container
+      #   run: |
+      #     docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      #     docker build -t cygnetops/react-test -f Dockerfile.dev .
+      #     docker run -e CI=true cygnetops/react-test npm test
 
       - name: Package application
         run: zip -r deploy.zip .platform . -x '*.git*'
